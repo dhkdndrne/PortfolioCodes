@@ -1,0 +1,37 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using Photon.Pun;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class Card : MonoBehaviour
+{
+	[SerializeField] private CardData cardData;
+
+	[SerializeField] private GameObject cardFront;
+	[SerializeField] private GameObject cardBack;
+	
+	[SerializeField] private Image charImage;
+	[SerializeField] private Image bgImage;
+	[SerializeField] private TextMeshProUGUI priceText;
+
+	private PhotonView pv;
+
+	private void Awake()
+	{
+		pv = GetComponent<PhotonView>();
+	}
+
+	private void Init()
+	{
+		charImage.sprite = cardData.CardImage;
+		priceText.text = cardData.Price.ToString();
+		
+		transform.SetPositionAndRotation(Vector3.zero,Quaternion.identity);
+		
+		cardFront.SetActive(false);
+		cardBack.SetActive(true);
+	}
+}

@@ -1,0 +1,3 @@
+# Ignore all .meta files in any project
+**/*.meta
+
