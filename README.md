@@ -1,6 +1,6 @@
 # PortfolioCodes
-01. 인벤토리 서바이버
-02. Hex puzzle
+01. Hex puzzle
+02. 인벤토리 서바이버
 03. 인벤토리 기능
 04. 방치형 게임
 05. 인벤토리 서바이버
