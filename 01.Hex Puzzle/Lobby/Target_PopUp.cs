@@ -47,7 +47,7 @@ public class Target_PopUp : PopUP
 			if (targets[i].targetData.TargetObjectType is TargetObjectType.Block)
 			{
 				var targetBlockData = (Target_Block_Data)targets[i].targetData;
-				targetTokens[i].image.color = ColorManager.Instance.GetColor(targetBlockData.ColorLayer);
+				targetTokens[i].image.color = ColorManager.GetColor(targetBlockData.ColorLayer);
 			}
 			
 			targetTokens[i].text.text = targets[i].count.ToString();

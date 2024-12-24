@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UniRx;
-using UniRx.Triggers;
 using UnityEngine;
 
 public class StateMachine : MonoBehaviour

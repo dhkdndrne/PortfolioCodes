@@ -67,8 +67,7 @@ public class State_Drop : State
 	private void DropAllBlocks()
 	{
 		var board = GameManager.Instance.Board;
-		isDrop = false;
-
+	
 		for (int y = 0; y < board.Row; y++)
 		{
 			for (int x = 0; x < board.Col; x++)
@@ -107,13 +106,13 @@ public class State_Drop : State
 					if (board.IsIndexOutOfRange(tempHex)) break;
 					if (!board.IsValidIndex(tempHex)) break;
 
-					//스폰블록일때
+					// 스폰 셀 여부 확인
 					if (board.SpawnCellList.Contains(board.GetCell(tempHex)))
 					{
 						canDrop = false;
 						break;
 					}
-
+					// 위에 있는 블록의 CanDrop 여부 확인
 					var upBlock = board.GetBlock(tempHex);
 					if (upBlock != null)
 					{
@@ -149,8 +148,7 @@ public class State_Drop : State
 		{
 			var hex = cell.Hex;
 			var nHex = new Hex(hex.x, hex.y - 1);
-
-			//if (!board.IsValidIndex(hex)) continue;
+			
 			if (board.IsIndexOutOfRange(nHex)) continue;
 			if (!board.IsValidIndex(nHex)) continue;
 

@@ -304,20 +304,7 @@ public class Board : MonoBehaviour
 
 		blocks[blockHex.y, blockHex.x] = null;
 	}
-
-	/// <summary>
-	/// 순차적으로 보여줌
-	/// </summary>
-	/// <param name="hashSet"></param>
-	public async UniTask ShowTargetHighlightAnim(HashSet<Block> hashSet)
-	{
-		foreach (var b in hashSet)
-		{
-			var cell = GetCell(b.Hex);
-			cell.Shadow.SetActive(false);
-			await UniTask.Delay(TimeSpan.FromSeconds(0.1f));
-		}
-	}
+	
 	/// <summary>
 	/// 한번에 보여줌
 	/// </summary>

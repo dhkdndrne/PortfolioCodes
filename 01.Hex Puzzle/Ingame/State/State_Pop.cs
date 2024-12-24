@@ -206,6 +206,7 @@ public class State_Pop : State
 			PopBlock();
 			await StartBlockPopAnimation();
 			isLoop = hpDic.Count > 0;
+			popSet.Clear();
 		}
 
 		foreach (var item in newItemList)

@@ -19,6 +19,7 @@ public class SpecialVerticalBehaviour : MonoBehaviour, ISpecialBlockBehaviour
 		
 		var board = GameManager.Instance.Board;
 		var colorLayer = board.GetBlock(hex).ColorLayer;
+		list.AddRange(PopBlockDataManager.Instance.PopSet);
 		
 		foreach (var b in board.GetBlockEnumerable())
 		{
@@ -32,11 +33,6 @@ public class SpecialVerticalBehaviour : MonoBehaviour, ISpecialBlockBehaviour
 	
 	public async UniTask Anim(Block block)
 	{
-		Board board = GameManager.Instance.Board;
-		
-		var task1 = board.ShowTargetHighlightAnim(list.ToHashSet());
-		var task2 = SpecialBlockBehaviourUtil.ChangeBlockToSlash(board, list, hashSet, sBlockData);
-			
-		await UniTask.WhenAll(task1, task2);
+		await SpecialBlockBehaviourUtil.ChangeToSpecialBlock(list, hashSet, sBlockData);
 	}
 }

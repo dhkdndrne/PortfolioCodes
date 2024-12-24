@@ -15,7 +15,7 @@ public class BoomerangProjectile : MonoBehaviour
    
    public void Init(ColorLayer color)
    {
-      spr.color = ColorManager.Instance.GetColor(color);
+      spr.color = ColorManager.GetColor(color);
       Anim().Forget();
    }
    public async UniTaskVoid Anim()
@@ -37,8 +37,7 @@ public class BoomerangProjectile : MonoBehaviour
          float t = elapsedTime / duration;
          Vector3 bezierPoint = CalculateBezierPoint(t, startPos, controlPoint, targetPos);
          transform.position = bezierPoint;
-
-         // Optional: Adjust rotation to face the movement direction
+         
          Vector3 direction = bezierPoint - transform.position;
          if (direction != Vector3.zero)
          {
@@ -48,7 +47,6 @@ public class BoomerangProjectile : MonoBehaviour
          await UniTask.Yield();
       }
 
-      // Ensure the final position is the target position
       transform.position = targetPos;
       //PopBlockDataManager.Instance.PopSet.Add(GameManager.Instance.Board.GetBlock(target.Hex));
       //Stage.Instance.Board.RemoveBlock(target.Hex);

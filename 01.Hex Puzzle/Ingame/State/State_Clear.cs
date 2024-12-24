@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using UniRx;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 
 public class State_Clear : State
@@ -12,13 +13,18 @@ public class State_Clear : State
 	[SerializeField] SpecialBlockData[] specialBlocks;
 	private void Awake()
 	{
-		OnBeginStream.Subscribe(_ =>
+		OnBeginStream.Subscribe(async _ =>
 		{
 			Debug.Log("클리어");
 			
 			if (!Stage.Instance.isClear)
 				StartPartyTime().Forget();
-			else Debug.Log("끝~~");
+			else
+			{
+				Debug.Log("끝~~");
+				await UniTask.Delay(2000);
+				SceneManager.LoadScene("LobbyScene");
+			}
 			
 		}).AddTo(this);
 

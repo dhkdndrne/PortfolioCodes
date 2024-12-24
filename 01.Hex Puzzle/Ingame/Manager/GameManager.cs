@@ -7,7 +7,7 @@ using UnityEngine;
 public class GameManager : Singleton<GameManager>,IManger
 {
     [SerializeField] private CameraController cc;
-    
+    [SerializeField] private StageData temp;
     private StateMachine stateMachine;
     private Board board;
     
@@ -24,10 +24,10 @@ public class GameManager : Singleton<GameManager>,IManger
         if (stateMachine == null)
             stateMachine = FindFirstObjectByType<StateMachine>();
         
-        Stage.Instance.LoadStage(StageManager.stageData);
+        Stage.Instance.LoadStage(StageManager.stageData ??= temp);
         board.InitBoard(StageManager.stageData);
         cc.FitCamera(board.Row,board.RowGap);
-
+        
         IsLoaded = true;
         stateMachine.StartFsm();
     }

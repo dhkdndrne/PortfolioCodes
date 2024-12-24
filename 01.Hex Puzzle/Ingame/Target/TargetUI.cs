@@ -16,7 +16,7 @@ public class TargetUI : MonoBehaviour
 
         if (targetData.TargetObjectType is TargetObjectType.Block)
         {
-            image.color = ColorManager.Instance.GetColor(((Target_Block_Data)targetData).ColorLayer);
+            image.color = ColorManager.GetColor(((Target_Block_Data)targetData).ColorLayer);
         }
         
         

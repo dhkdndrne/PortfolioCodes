@@ -31,10 +31,7 @@ public class SpecialBlockCombiner : Singleton<SpecialBlockCombiner>, IManger
 		if (sb.ColorLayer == ColorLayer.None)
 		{
 			block = tb;
-			//GameManager.Instance.Board.RemoveBlock(sb.Hex);
 		}
-		//else GameManager.Instance.Board.RemoveBlock(tb.Hex);
-
 		PopBlockDataManager.Instance.SpecialBlocks.Add((block.Hex, newBlockType,blockBehaviour));
 	}
 	public void InitManager()

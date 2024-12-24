@@ -48,6 +48,8 @@ public class Board_Edit : ObjectSingleton<Board_Edit>
 
 		DestroyHolder();
 		CreateHolder();
+
+		InitTargets();
 		
 		for (int y = 0; y < Row; y++)
 		{
@@ -65,6 +67,40 @@ public class Board_Edit : ObjectSingleton<Board_Edit>
 		blockHolder.position = new Vector3(-xCenter, -yCenter, blockHolder.position.z);
 
 		GameObject.FindObjectOfType<CameraController>().FitCamera(Row, RowGap);
+	}
+	private void InitTargets()
+	{
+		var targetList = stageData.GetTargetList();
+		if (targetList == null) return;
+		
+		foreach (var targetToken in targetList)
+		{
+			if(targetToken.tokenList.Count == 0) continue;
+			
+			var targetType = targetToken.targetData.TargetObjectType;
+			int count = targetToken.count;	// 타겟의 개수
+			Transform parent = targetType is TargetObjectType.Block ? blockHolder : cellHolder;
+			
+			for (int i = 0; i < count; i++)
+			{
+				Hex hex = targetToken.tokenList[i].hex;
+	
+				var targetData = (Target_Block_Data)targetToken.targetData;
+				var obj = GameObject.Instantiate(((Target_Block_Data)targetToken.targetData).Prefab,parent);
+				var block = obj.GetComponent<Block>();
+				
+				var newBlockData = ScriptableObject.CreateInstance<BlockData>();
+				var blockData = targetData.BlockData;
+		
+				// Reflection을 사용해 필드 값 복사
+				Util.CopyFields(blockData, newBlockData);
+				
+				//체력 재설정
+				blockData.HP = targetToken.tokenList[i].hp;
+				obj.transform.localPosition = IndexToLocalPos(hex.x,hex.y);
+				block.SetData(targetData.BlockData);
+			}
+		}
 	}
 
 	public void DestroyHolder()
@@ -362,6 +398,9 @@ public class Board_Edit : ObjectSingleton<Board_Edit>
 		
 		if (cellData.cellType is CellType.None)
 			cells[hex.y, hex.x].gameObject.SetActive(false);
+		
+		if (cellData.cellType is CellType.Basic)
+			cells[hex.y, hex.x].gameObject.SetActive(true);
 	}
 }
 # endif

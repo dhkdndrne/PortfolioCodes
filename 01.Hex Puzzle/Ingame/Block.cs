@@ -32,10 +32,10 @@ public class Block : GridObject
 		ColorLayer = colorLayer;
 
 		if (Application.isPlaying)
-			spriteRenderer.color = ColorManager.Instance.GetColor(colorLayer);
+			spriteRenderer.color = ColorManager.GetColor(colorLayer);
 		else
 		{
-			spriteRenderer.color = ColorManager.Instance.GetColorInEditor(colorLayer);
+			spriteRenderer.color = ColorManager.GetColorInEditor(colorLayer);
 		}
 	}
 

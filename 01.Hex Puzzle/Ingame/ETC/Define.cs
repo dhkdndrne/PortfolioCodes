@@ -28,6 +28,7 @@ public enum SpecialBlockType
 	R_Slash = 50,
 	Vertical = 60,
 	Boomerang = 70,
+	
 	//스페셜 조합
 	Munchkin = Super * Super,
 	Special_Bomb = Super * Bomb,

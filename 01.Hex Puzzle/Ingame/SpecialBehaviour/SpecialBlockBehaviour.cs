@@ -28,16 +28,33 @@ public class SpecialBlockBehaviour : MonoBehaviour, ISpecialBlockBehaviour
 
 	public async UniTask Anim(Block block)
 	{
-		await GameManager.Instance.Board.ShowTargetHighlightAnim(hashSet);
+		var board = GameManager.Instance.Board;
+		
+		foreach (var b in hashSet)
+		{
+			var cell = board.GetCell(b.Hex);
+			cell.Shadow.SetActive(false);
+			await UniTask.Delay(TimeSpan.FromSeconds(0.1f));
+		}
 	}
 }
 
 public static class SpecialBlockBehaviourUtil
 {
-	public static async UniTask ChangeBlockToSlash(Board board, List<Block> list, HashSet<Block> hashSet, SpecialBlockData sBlockData)
+	public static async UniTask ChangeToSpecialBlock(List<Block> list, HashSet<Block> hashSet, SpecialBlockData sBlockData)
 	{
-		foreach (var b in list)
+		var board = GameManager.Instance.Board;
+		
+		for (int i = 0; i < list.Count; i++)
 		{
+			var b = list[i];
+
+			var cell = board.GetCell(b.Hex);
+			cell.Shadow.SetActive(false);
+
+			if (i < 2) // 0,1 번째 인덱스는 조합에 사용된 특수블록들이므로 하이라이트만 비추고 변환은 하지않기위해서 continue
+				continue;
+			
 			var sBlock = BlockSpawner.Instance.SpawnSpecialBlock(new ReservedSBlockData(sBlockData, b.ColorLayer, b.Hex, null));
 			board.RemoveBlock(b.Hex);
 			board.SetBlock(b.Hex, sBlock);

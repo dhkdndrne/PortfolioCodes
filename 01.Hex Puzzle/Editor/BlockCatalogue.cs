@@ -179,6 +179,9 @@ public class BlockCatalogue : CatalogueItem
 			if (GUILayout.Button(buttonContent, buttonStyle))
 			{
 				selectedBlockData.blockData = specialBlockData;
+				
+				if (specialBlockData.SBlockType is SpecialBlockType.Super)
+					selectedBlockData.color = ColorLayer.None;
 				Debug.Log($"Color: {selectedBlockData.color}, Name: {selectedBlockData.blockData.name}");
 			}
 
