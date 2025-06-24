@@ -22,6 +22,17 @@ public class Stage : MonoBehaviour
 	[SerializeField] private EnemySpawner enemySpawner = new EnemySpawner();
 
 	public int Life => life.Value;
+	private bool isEndWave;
+	
+	public bool CheckClearStage()
+	{
+		bool isClear = isEndWave && enemySpawner.SpawnedEnemyCount == 0;
+
+		if(isClear)
+			Debug.Log("스테이지 끝");
+		
+		return isClear;
+	}
 
 
 	//todo 나중에 바꿔야함 한번에 여러개씩 나올 수 있음
@@ -58,6 +69,10 @@ public class Stage : MonoBehaviour
 				}
 				waveIndex++;
 			}
+		}
+		else
+		{
+			isEndWave = true;
 		}
 	}
 

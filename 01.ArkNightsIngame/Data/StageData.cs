@@ -22,6 +22,7 @@ public class StageData : ScriptableObject
 	public float CostIncreaseTime => costIncreaseTime;
 	public int GetTotalEnemyCount()
 	{
-		return wave.waveList.Sum(w => w.waveDatas.Sum(data => data.order));
+		int totalCount = wave.waveList.Sum(w => w.waveDatas.Sum(data => data.order)) - 1;
+		return totalCount;
 	}
 }

@@ -64,6 +64,7 @@ public class SelectedOperatorUI : MonoBehaviour
 			Close();
 			return;
 		}
+		
 		TimeManager.Instance.StartSlowMotion();
 		//선택한 오퍼레이터와 이전에 클릭한 오퍼레이터가 다를때
 		if (currentOperator != op)

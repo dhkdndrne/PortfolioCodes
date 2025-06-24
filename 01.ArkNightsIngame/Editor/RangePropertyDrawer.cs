@@ -84,7 +84,6 @@ public class RangePropertyDrawer : PropertyDrawer
 						break;
 				}
 				MouseEvent(tileRect, index, grid);
-
 			}
 		}
 	}

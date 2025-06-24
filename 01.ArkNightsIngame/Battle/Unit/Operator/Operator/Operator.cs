@@ -55,7 +55,7 @@ public abstract class Operator : Unit
 		tilesInAttackRange = new List<Tile>();
 		talents = GetComponentsInChildren<TalentHandler>().ToList();
 	}
-
+	
 	public void SetController(OperatorController controller) => this.controller = controller;
 
 	public override void Init()
@@ -75,24 +75,8 @@ public abstract class Operator : Unit
 
 		block = Attribute.Block;
 
-		bool isFirstDead = true;
-		int firstCost = Cost.Value;
+
 		
-		OnDeath += () =>
-		{
-			onTile.RemoveUnit();
-			SetTile(null);
-			block = ((OperatorAttribute)attribute).Block;
-			attackRange = rangeData.GetGridArray();
-
-			Cost.Value = isFirstDead ? (int)(firstCost * 1.5f) : firstCost * 2;
-
-			if (Cost.Value >= 99)
-				Cost.Value = 99;
-
-			isFirstDead = false;
-			GameManager.Instance.RemoveOperator(this);
-		};
 
 		onDeploy += () =>
 		{
@@ -237,4 +221,22 @@ public abstract class Operator : Unit
 		SetTilesInAttackRange();
 	}
 
+	protected override void OnUnitDead()
+	{
+		bool isFirstDead = true;
+		int firstCost = Cost.Value;
+		
+		onTile.RemoveUnit();
+		SetTile(null);
+		block = ((OperatorAttribute)attribute).Block;
+		attackRange = rangeData.GetGridArray();
+
+		Cost.Value = isFirstDead ? (int)(firstCost * 1.5f) : firstCost * 2;
+
+		if (Cost.Value >= 99)
+			Cost.Value = 99;
+
+		isFirstDead = false;
+		GameManager.Instance.RemoveOperator(this);
+	}
 }

@@ -123,7 +123,7 @@ public class OperatorSlot_UI : MonoBehaviour, IPointerDownHandler, IPointerUpHan
 
 		while (timer > 0)
 		{
-			timer -= Time.deltaTime;   // 시간 감소
+			timer -= CustomTime.deltaTime;   // 시간 감소
 			if (timer <= 0) timer = 0; // 음수 방지
 
 			float elapsedTime = coolTime - timer;      // 경과 시간 계산

@@ -30,7 +30,6 @@ public class Enemy : Unit
 	{
 		var data = DataManager.Instance.EnemyData.GetEnemyData(enemyID);
 		attribute = new EnemyAttribute(data.Hp, data.AttackCoolTime, data.AttackPower, data.Defense, data.MagicDefense, data.MoveSpeed);
-		sliderHandler.ChainEvent(attribute.HpRatio, 1);
 	}
 
 	public override bool IsDead()
@@ -38,6 +37,21 @@ public class Enemy : Unit
 		return attribute.Hp.Value <= 0;
 	}
 
+	protected override void OnEnable()
+	{
+		base.OnEnable();
+
+		if (attribute as EnemyAttribute != null)
+		{
+			attribute.ResetHp();
+			sliderHandler.ChainEvent(attribute.HpRatio, 1);
+		}
+	}
+	
+	protected override void OnUnitDead()
+	{
+		sliderHandler.UnChainEvent(attribute.Hp);
+	}
 	public override void Hit(Unit attacker)
 	{
 		attribute.Hp.Value -= CombatFormulaUtil.GetFinalMeleeDamage(attacker, this);

@@ -2,6 +2,7 @@ using System;
 using Bam.Singleton;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 
 public class GameManager : Singleton<GameManager>
@@ -38,11 +39,20 @@ public class GameManager : Singleton<GameManager>
 				stage.UpdateStage(CustomTime.deltaTime);
 			})
 			.AddCondition((int)GameState.Lose, () => stage.Life <= 0)
-			.AddCondition((int)GameState.Win, () => false));
-		
-		stateMachine.AddState((int)GameState.Lose, new State().OnEnter(() =>
-		{
+			.AddCondition((int)GameState.Win, () =>
+			{
+				if (stage.CheckClearStage())
+				{
+					AutoBattleManager.Instance.SaveTimelineToFile();
+					return true;
+				}
 
+				return false;
+			}));
+		
+		stateMachine.AddState((int)GameState.Win,new State().OnEnter(()=>
+		{
+			SceneManager.LoadScene("Stage_1-1");
 		}));
 	}
 

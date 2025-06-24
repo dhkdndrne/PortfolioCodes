@@ -54,11 +54,13 @@ public class OperatorController : MonoBehaviour
 	}
 	private void OnEnable()
 	{
+		op.OnDeath += OnOperatorDead;
 		TimeManager.Instance.OnTimeScaleChanged += OnTimeScaleChanged;
 	}
 
 	private void OnDisable()
 	{
+		op.OnDeath -= OnOperatorDead;
 		TimeManager.Instance.OnTimeScaleChanged -= OnTimeScaleChanged;
 	}
 
@@ -66,7 +68,13 @@ public class OperatorController : MonoBehaviour
 	{
 		animator.speed = newScale;
 	}
-	
+	private void OnOperatorDead()
+	{
+		isDeployed = false;
+		uiHandler.UnChainEvent(op.Attribute, op.GetSkill());
+		uiHandler.HpBar.SetSliderActive(false);
+		uiHandler.SpBar.SetSliderActive(false);
+	}
 	public void Init()
 	{
 		objBody = transform.Find("Body");
@@ -75,14 +83,6 @@ public class OperatorController : MonoBehaviour
 		var skill = op.GetSkill();
 		LazyAnimatorInit(skill).Forget();
 		
-		op.OnDeath += () =>
-		{
-			isDeployed = false;
-			uiHandler.UnChainEvent(op.Attribute, skill);
-			uiHandler.HpBar.SetSliderActive(false);
-			uiHandler.SpBar.SetSliderActive(false);
-		};
-
 		op.onHit += () =>
 		{
 			HitAnimation().Forget();

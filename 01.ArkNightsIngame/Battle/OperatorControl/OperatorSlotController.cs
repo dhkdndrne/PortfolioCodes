@@ -59,7 +59,6 @@ public class OperatorSlotController : MonoBehaviour
 				if (selectedSlot == slots[slotIndex])
 				{
 					ResetSelectedSlot();
-					ChangeSlotSize();
 
 					selectedOperator = null;
 
@@ -210,8 +209,7 @@ public class OperatorSlotController : MonoBehaviour
 			operatorDirectionUI.SetPositions(Camera.main.WorldToScreenPoint(selectedOperator.transform.position));
 		}
 	}
-
-	// todo 나중에 수정
+	
 	private void ChangeSlotSize()
 	{
 		int activeCount = slots.Count(x => x.gameObject.activeInHierarchy);
@@ -242,8 +240,8 @@ public class OperatorSlotController : MonoBehaviour
 			}
 			else rt.sizeDelta = new Vector2(size, size); // 슬롯 크기 설정
 
-			//rt.anchoredPosition = new Vector2(currentX, 0); // 슬롯 위치 설정
-			//currentX -= size; // 다음 슬롯으로 이동
+			rt.anchoredPosition = new Vector2(currentX, 0); // 슬롯 위치 설정
+			currentX -= size; // 다음 슬롯으로 이동
 		}
 	}
 

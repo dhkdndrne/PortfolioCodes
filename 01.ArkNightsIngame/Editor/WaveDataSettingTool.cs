@@ -1,4 +1,3 @@
-// WaveDataSettingTool.cs
 using UnityEngine;
 using UnityEditor;
 
@@ -36,6 +35,9 @@ public static class WaveDataSettingTool
 		if (!Physics.Raycast(ray, out var hit, Mathf.Infinity, tileMask))
 			return;
 
+		if (!hit.collider.GetComponent<Tile>().TileType.HasFlag(TileType.Road))
+			return;
+		
 		// 클릭 위치
 		Vector3 tilePos = hit.collider.transform.position;
 		tilePos.y += hit.collider.transform.localScale.y * 0.7f;

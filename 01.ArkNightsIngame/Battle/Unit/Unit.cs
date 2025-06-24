@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-
 public abstract class Unit : MonoBehaviour, IDamageable
 {
 	protected string unitName;
 	
-	protected Attribute attribute;
+	[SerializeField] protected Attribute attribute;
 	protected Dictionary<Type, List<Buff>> activeBuffsDict = new Dictionary<Type, List<Buff>>();
 	
 	private event Action onDeath;
@@ -17,7 +16,15 @@ public abstract class Unit : MonoBehaviour, IDamageable
 		add { onDeath += value; }
 		remove { onDeath -= value; }
 	}
-	
+
+	protected virtual void OnEnable()
+	{
+		onDeath += OnUnitDead;
+	}
+	protected virtual void OnDisable()
+	{
+		onDeath -= OnUnitDead;
+	}
 	public string UnitName => unitName;
 	
 	public abstract void Init();
@@ -31,11 +38,14 @@ public abstract class Unit : MonoBehaviour, IDamageable
 		gameObject.SetActive(false);
 	}
 
+	protected abstract void OnUnitDead();
+	
 	public abstract void Hit(Unit attacker);
 	
 	public bool Heal(float amount)
 	{
 		if (IsDead()) return false;
+		if (Mathf.Approximately(attribute.HpRatio.Value, 1f)) return false;
 		
 		attribute.Hp.Value += amount;
 		return true;

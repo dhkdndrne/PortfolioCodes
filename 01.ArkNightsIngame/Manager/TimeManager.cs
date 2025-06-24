@@ -74,6 +74,7 @@ public class TimeManager : Singleton<TimeManager>
 	public void SetTimeScale(float t)
 	{
 		if (Mathf.Approximately(timeScale, t)) return;
+		prevTimeScale = timeScale;
 		timeScale = t;
 		OnTimeScaleChanged?.Invoke(timeScale);
 	}
@@ -87,10 +88,12 @@ public class TimeManager : Singleton<TimeManager>
 		SetTimeScale(slowValue);
 	}
 
-	public void StopSlowMotion(float normalValue = 1f)
+	public void StopSlowMotion()
 	{
 		if (isPaused) return;
-		SetTimeScale(normalValue);
+		if (timeScale >= 0.5f) return;
+		
+		SetTimeScale(prevTimeScale);
 	}
 }
 

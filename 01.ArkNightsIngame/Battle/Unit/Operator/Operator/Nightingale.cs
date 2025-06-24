@@ -24,8 +24,6 @@ public class Nightingale : Operator
 		
 		if (skill?.SpChargeType == SpChargeType.PerSecond)
 			GetComponent<OperatorController>().OnSkillSpCharge += skill.ChargeSP;
-		
-		ObjectPoolManager.Instance.CreatePoolDynamic(attackFX,3);
 	}
 	public override void Attack(HashSet<Unit> targetList)
 	{
@@ -33,7 +31,7 @@ public class Nightingale : Operator
 		{
 			if (target.Heal(GetFinalDamage()))
 			{
-				var fx = ObjectPoolManager.Instance.Spawn(attackFX.name);
+				var fx = ObjectPoolManager.Instance.Spawn(attackFX);
 				fx.transform.position = target.transform.position;
 			}
 		}

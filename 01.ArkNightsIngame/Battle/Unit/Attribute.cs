@@ -73,7 +73,7 @@ public class Attribute
 [System.Serializable]
 public class EnemyAttribute : Attribute
 {
-	private float moveSpeed;
+	[SerializeField] private float moveSpeed;
 	public EnemyAttribute(float maxHp, float attackSpeed, float atkPower, float defense, float magicResistance, float moveSpeed) : base(maxHp, attackSpeed, atkPower, defense, magicResistance)
 	{
 		this.moveSpeed = moveSpeed;

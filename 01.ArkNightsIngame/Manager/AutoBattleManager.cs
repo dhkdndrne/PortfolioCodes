@@ -132,7 +132,7 @@ public class AutoBattleManager : Singleton<AutoBattleManager>
 		string fileName = SceneManager.GetActiveScene().name;
 		string filePath = Path.Combine(Application.persistentDataPath, fileName);
 		File.WriteAllText(filePath, json);
-		Debug.Log($"Timeline saved to {filePath}");
+		Debug.Log($"자동전투 저장완료 {filePath}");
 	}
 
 	// 파일로부터 JSON을 읽어 타임라인 이벤트를 복원하는 메서드

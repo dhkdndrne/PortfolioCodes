@@ -10,6 +10,7 @@ public class EnemyData
 	public async UniTask LoadData()
 	{
 		await LoadEnemyData();
+		Debug.LogSuccess("적 데이터 로드 완료");
 	}
 	public EnemyBaseData GetEnemyData(int id)
 	{
@@ -19,7 +20,6 @@ public class EnemyData
 	private async UniTask LoadEnemyData()
 	{
 		var data = await SpreadSheetReader.LoadGoogleSheet(URL_EnemyData);
-		
 		
 		for (int i = 1; i < data.Length; i++)
 		{

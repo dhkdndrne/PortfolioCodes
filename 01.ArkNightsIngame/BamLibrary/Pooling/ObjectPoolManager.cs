@@ -45,18 +45,7 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
 			poolDictionary[key] = pool;
 		}
 	}
-
-	// 오브젝트 가져오기
-	public void CreatePoolDynamic(GameObject obj,int size, Action<GameObject> onSpawn = null)
-	{
-		string key = obj.name;
-		if (!poolDictionary.TryGetValue(key, out var pool))
-		{
-			//새로운 풀 생성
-			AddNewPool(obj,size);
-			pool = poolDictionary[key];
-		}
-	}
+	
 	public GameObject Spawn(string key, Action<GameObject> onSpawn = null)
 	{
 		if (!poolDictionary.TryGetValue(key, out var pool))
@@ -67,7 +56,21 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
 
 		return pool.Spawn(onSpawn);
 	}
+	
+	// 오브젝트 가져오기
+	public GameObject Spawn(GameObject prefab,int size = 10, Action<GameObject> onSpawn = null)
+	{
+		string key = prefab.name;
+		if (!poolDictionary.TryGetValue(key, out var pool))
+		{
+			//새로운 풀 생성
+			AddNewPool(prefab,size);
+			pool = poolDictionary[key];
+		}
 
+		return pool.Spawn(onSpawn);
+	}
+	
 	// 오브젝트 반환
 	public void DeSpawn(GameObject obj, Action<GameObject> onReturn = null)
 	{

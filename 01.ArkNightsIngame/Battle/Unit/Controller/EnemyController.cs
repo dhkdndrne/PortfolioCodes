@@ -29,9 +29,9 @@ public class EnemyController : MonoBehaviour
 	private List<WayPoint> wayPoints;
 	//private List<Tile> curTile; // 0 이전타일 , 1 다음 타일
 
-	private Tile currentTile;
-	private Tile beforeTile;
-	private Tile targetTile;
+	[SerializeField] private Tile currentTile;
+	[SerializeField] private Tile beforeTile;
+	[SerializeField] private Tile targetTile;
 	public event Action OnArrival; //적이 도착했을때 동작할 이벤트
 	public Enemy EnemyUnit => enemyUnit;
 	private void Awake()
@@ -42,16 +42,17 @@ public class EnemyController : MonoBehaviour
 		objBody = animator.transform;
 
 		enemyUnit = GetComponent<Enemy>();
-
 		Init();
 	}
 	private void OnEnable()
 	{
+		enemyUnit.OnDeath += OnEnemyDead;
 		TimeManager.Instance.OnTimeScaleChanged += OnTimeScaleChanged;
 	}
 
 	private void OnDisable()
 	{
+		enemyUnit.OnDeath -= OnEnemyDead;
 		TimeManager.Instance.OnTimeScaleChanged -= OnTimeScaleChanged;
 	}
 
@@ -59,29 +60,37 @@ public class EnemyController : MonoBehaviour
 	{
 		animator.speed = newScale;
 	}
+
+	private void OnEnemyDead()
+	{
+		ResetInfo();
+		if (target != null)
+		{
+			var op = target as Operator;
+			if (op != null)
+			{
+				op.Block++;
+			}
+		}
+		target = null;
+		GameManager.Instance.Stage.AddKillCount();
+	}
+
+	private void ResetInfo()
+	{
+		currentTile?.Enemies.Remove(enemyUnit);
+		beforeTile?.Enemies.Remove(enemyUnit);
+		targetTile?.Enemies.Remove(enemyUnit);
+
+		currentTile = null;
+		beforeTile = null;
+		targetTile = null;
+	}
 	
 	private void Init()
 	{
 		enemyUnit.Init();
 		InitState();
-
-		enemyUnit.OnDeath += () =>
-		{
-			wayPointIndex = 0;
-			currentTile?.Enemies.Remove(enemyUnit);
-			beforeTile?.Enemies.Remove(enemyUnit);
-			targetTile?.Enemies.Remove(enemyUnit);
-			
-			if (target != null)
-			{
-				var op = target as Operator;
-				if (op != null)
-				{
-					op.Block++;
-				}
-			}
-			GameManager.Instance.Stage.AddKillCount();
-		};
 
 		var enemyEventHandler = GetComponentInChildren<EnemyEventHandler>();
 		enemyEventHandler.OnAttackAction += Attack;
@@ -93,6 +102,9 @@ public class EnemyController : MonoBehaviour
 		stateMachine.AddState((int)Enemy_State.Idle, new State().OnEnter(() =>
 		{
 			target = null;
+		}).AddCondition((int)Enemy_State.Move, () =>
+		{
+			return true;
 		}));
 
 		// 다음 타일에 등록 했는지
@@ -100,9 +112,11 @@ public class EnemyController : MonoBehaviour
 		bool isWaiting = false;
 		bool check = false;
 		float duration = 0f;
-		
+
 		stateMachine.AddState((int)Enemy_State.Move, new State().OnEnter(() =>
 		{
+			wayPointIndex = 0;
+			
 			currentTile = GameManager.Instance.TileManager.GetTile(wayPoints[0].Position);
 			currentTile.Enemies.Add(enemyUnit);
 
@@ -178,7 +192,7 @@ public class EnemyController : MonoBehaviour
 				int pathX = Mathf.RoundToInt(transform.position.x);
 				int pathZ = Mathf.RoundToInt(transform.position.z);
 				var newTile = GameManager.Instance.TileManager.Tiles[pathZ, pathX];
-				
+
 				if (currentTile != newTile)
 				{
 					// 앞으로 이동할 타일과의 거리 계산
@@ -214,14 +228,16 @@ public class EnemyController : MonoBehaviour
 			else
 			{
 				OnArrival?.Invoke();
+				ResetInfo();
 				GameManager.Instance.Stage.ReduceLife();
-				wayPointIndex = 0;
-				gameObject.SetActive(false);
 			}
 		}).AddCondition((int)Enemy_State.Attack, () =>
 		{
-			Operator op = currentTile.UnitOnTile;
+			if (currentTile == null)
+				return false;
 			
+			Operator op = currentTile.UnitOnTile;
+
 			if (op != null && op.Block > 0)
 			{
 				op.Block--;
@@ -232,6 +248,7 @@ public class EnemyController : MonoBehaviour
 			return false;
 		}).OnEnd(() =>
 		{
+			check = false;
 			animator.SetBool(Move_ANIM_HASH, false);
 		}));
 
@@ -255,11 +272,11 @@ public class EnemyController : MonoBehaviour
 	{
 		if (enemyUnit.IsDead())
 			return;
-		
+
 		UpdateCoolTime();
 		stateMachine.Update();
 	}
-	
+
 	private void Attack()
 	{
 		enemyUnit.Attack(target);
@@ -283,6 +300,6 @@ public class EnemyController : MonoBehaviour
 	public void StartActive(List<WayPoint> wayPoints)
 	{
 		this.wayPoints = wayPoints;
-		stateMachine.ChangeState((int)Enemy_State.Move);
+		stateMachine.ChangeState((int)Enemy_State.Idle);
 	}
 }
