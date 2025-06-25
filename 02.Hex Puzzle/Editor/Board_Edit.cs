@@ -20,7 +20,7 @@ public class Board_Edit : ObjectSingleton<Board_Edit>
 
 	private List<Cell> cellList = new List<Cell>();
 
-	private const string BLOCK_PREFABLIST_PATH = "Assets/09.Data/Editor BlockPrefabList.asset";
+	private const string BLOCK_PREFABLIST_PATH = "Assets/09.Data/Editor/BlockPrefabList.asset";
 	private EditorBlockPrefabList editorBlockPrefabList;
 
 	public int Col => stageData.Col;

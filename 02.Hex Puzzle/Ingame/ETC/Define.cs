@@ -22,39 +22,29 @@ public enum CellType
 public enum SpecialBlockType
 {
 	None,
-	Super = 10,
-	Bomb = 30,
-	L_Slash = 40,
-	R_Slash = 50,
-	Vertical = 60,
-	Boomerang = 70,
+	Super,
+	Bomb,
+	L_Slash,
+	R_Slash,
+	Vertical,
 	
 	//스페셜 조합
-	Munchkin = Super * Super,
-	Special_Bomb = Super * Bomb,
-	Special_RSlash = Super * R_Slash,
-	Special_LSlash = Super * L_Slash,
-	Special_Vertical = Super * Vertical,
-	Special_Boomerang = Super * Boomerang,
+	Munchkin,
+	Special_Bomb,
+	Special_RSlash,
+	Special_LSlash,
+	Special_Vertical,
 	
 	//폭탄 조합
-	Bomb_Bomb = Bomb * Bomb,
-	Bomb_RSlash = Bomb * R_Slash,
-	Bomb_LSlash = Bomb * L_Slash,
-	Bomb_Vertical = Bomb * Vertical,
-	Bomb_Boomerang = Bomb * Boomerang,
+	Bomb_Bomb,
+	Bomb_RSlash,
+	Bomb_LSlash,
+	Bomb_Vertical,
 	
 	//슬래쉬 조합
-	Slash_Slash = L_Slash * R_Slash,
-	LSlash_Vertical = L_Slash * Vertical,
-	RSlash_Vertical = R_Slash * Vertical,
-	LSlash_Boomerang = L_Slash * Boomerang,
-	RSlash_Boomerang = R_Slash * Boomerang,
-	
-	// 나머지 조합
-	// 세로 + 세로는 그냥 세로라 패스
-	Vertical_Boomerang = Vertical * Boomerang,
-	Boomerang_Boomeran = Boomerang * Boomerang	
+	Slash_Slash,
+	LSlash_Vertical,
+	RSlash_Vertical,
 }
 
 

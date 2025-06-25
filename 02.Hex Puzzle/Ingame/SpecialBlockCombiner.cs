@@ -3,27 +3,24 @@ using System.Collections;
 using System.Collections.Generic;
 using Bam.Singleton;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class SpecialBlockCombiner : Singleton<SpecialBlockCombiner>, IManger
 {
-	private Dictionary<SpecialBlockType, ISpecialBlockBehaviour> dic = new();
 	[SerializeField] private List<CombineData> combineDataList = new();
+	private Dictionary<(SpecialBlockType, SpecialBlockType), (SpecialBlockType type, ISpecialBlockBehaviour behaviour)> dic = new();
 
 	public void Combine(Block sb, Block tb, SpecialBlockType sbType, SpecialBlockType tbType)
 	{
-		SpecialBlockType newBlockType = (SpecialBlockType)((int)sbType * (int)tbType);
+		var sortedKey = GetSortedKey(sbType, tbType);
 
 		// 특수 블록이 정의되어있지 않을때 (ex 세로 x 세로 )
-		if (!Enum.IsDefined(typeof(SpecialBlockType), newBlockType))
+		if (!dic.TryGetValue(sortedKey, out var result))
 		{
-			newBlockType = sbType;
+			result.type = sbType;
+			result.behaviour = sb.GetComponent<ISpecialBlockBehaviour>();
 		}
 
-		if (!dic.TryGetValue(newBlockType, out ISpecialBlockBehaviour blockBehaviour))
-		{
-			blockBehaviour = sb.GetComponent<ISpecialBlockBehaviour>();
-		}
-		
 		Block block = sb;
 		PopBlockDataManager.Instance.PopSet.Add(sb);
 		PopBlockDataManager.Instance.PopSet.Add(tb);
@@ -32,20 +29,27 @@ public class SpecialBlockCombiner : Singleton<SpecialBlockCombiner>, IManger
 		{
 			block = tb;
 		}
-		PopBlockDataManager.Instance.SpecialBlocks.Add((block.Hex, newBlockType,blockBehaviour));
+		PopBlockDataManager.Instance.SpecialBlocks.Add((block.Hex, result.type, result.behaviour));
 	}
 	public void InitManager()
 	{
 		foreach (var data in combineDataList)
 		{
-			dic.Add(data.BlockType, data.obj.GetComponent<ISpecialBlockBehaviour>());
+			dic[GetSortedKey(data.block1, data.block2)] = (data.resultType, data.obj.GetComponent<ISpecialBlockBehaviour>());
 		}
+	}
+
+	private (SpecialBlockType, SpecialBlockType) GetSortedKey(SpecialBlockType a, SpecialBlockType b)
+	{
+		return a.CompareTo(b) <= 0 ? (a, b) : (b, a);
 	}
 }
 
 [Serializable]
 public struct CombineData
 {
-	public SpecialBlockType BlockType;
+	public SpecialBlockType resultType;
+	public SpecialBlockType block1;
+	public SpecialBlockType block2;
 	public Block obj;
 }
