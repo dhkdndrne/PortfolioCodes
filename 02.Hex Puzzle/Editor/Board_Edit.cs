@@ -14,7 +14,7 @@ public class Board_Edit : ObjectSingleton<Board_Edit>
 	private Cell[,] cells;
 	private Block[,] blocks;
 	private GameObject[,] targets;
-	
+
 	private Transform cellHolder;
 	private Transform blockHolder;
 
@@ -27,7 +27,7 @@ public class Board_Edit : ObjectSingleton<Board_Edit>
 	public int Row => stageData.Row;
 	public float ColGap => stageData.ColGap;
 	public float RowGap => stageData.RowGap;
-	
+
 	public Board_Edit()
 	{
 		editorBlockPrefabList = AssetDatabase.LoadAssetAtPath<EditorBlockPrefabList>(BLOCK_PREFABLIST_PATH);
@@ -50,7 +50,7 @@ public class Board_Edit : ObjectSingleton<Board_Edit>
 		CreateHolder();
 
 		InitTargets();
-		
+
 		for (int y = 0; y < Row; y++)
 		{
 			for (int x = 0; x < Col; x++)
@@ -72,32 +72,32 @@ public class Board_Edit : ObjectSingleton<Board_Edit>
 	{
 		var targetList = stageData.GetTargetList();
 		if (targetList == null) return;
-		
+
 		foreach (var targetToken in targetList)
 		{
-			if(targetToken.tokenList.Count == 0) continue;
-			
+			if (targetToken.tokenList.Count == 0) continue;
+
 			var targetType = targetToken.targetData.TargetObjectType;
-			int count = targetToken.count;	// 타겟의 개수
+			int count = targetToken.count; // 타겟의 개수
 			Transform parent = targetType is TargetObjectType.Block ? blockHolder : cellHolder;
-			
+
 			for (int i = 0; i < count; i++)
 			{
 				Hex hex = targetToken.tokenList[i].hex;
-	
+
 				var targetData = (Target_Block_Data)targetToken.targetData;
-				var obj = GameObject.Instantiate(((Target_Block_Data)targetToken.targetData).Prefab,parent);
+				var obj = GameObject.Instantiate(((Target_Block_Data)targetToken.targetData).Prefab, parent);
 				var block = obj.GetComponent<Block>();
-				
+
 				var newBlockData = ScriptableObject.CreateInstance<BlockData>();
 				var blockData = targetData.BlockData;
-		
+
 				// Reflection을 사용해 필드 값 복사
 				Util.CopyFields(blockData, newBlockData);
-				
+
 				//체력 재설정
 				blockData.HP = targetToken.tokenList[i].hp;
-				obj.transform.localPosition = IndexToLocalPos(hex.x,hex.y);
+				obj.transform.localPosition = IndexToLocalPos(hex.x, hex.y);
 				block.SetData(targetData.BlockData);
 			}
 		}
@@ -178,10 +178,10 @@ public class Board_Edit : ObjectSingleton<Board_Edit>
 			var colorLayer = stageData.sBlockColorTokens.Where(b => b.hex == new Hex(x, y)).Select(x => x.colorLayer).FirstOrDefault();
 			block.SetColor(colorLayer);
 		}
-		
+
 		blocks[y, x] = block;
 	}
-	
+
 	private Vector3 IndexToLocalPos(int x, int y)
 	{
 		float nx = x * ColGap;
@@ -227,26 +227,44 @@ public class Board_Edit : ObjectSingleton<Board_Edit>
 	}
 	#region 타겟블록
 
-	public void SetTarget(TargetData targetData, Hex hex,int value)
+	public void SetTarget(TargetData targetData, Hex hex, int value)
 	{
 		if (targetData is null)
-		{ 
-			GameObject.DestroyImmediate(targets[hex.y, hex.x]);
-			targets[hex.y, hex.x] = null;
+		{
+			var targetList = stageData.GetTargetList();
+
+			foreach (var target in targetList)
+			{
+				var token = target.tokenList.FirstOrDefault(t => t.hex == hex);
+				if (token != null)
+				{
+					target.tokenList.Remove(token);
+					target.count--;
+
+					GameObject.DestroyImmediate(targets[hex.y, hex.x]);
+					targets[hex.y, hex.x] = null;
+
+					if (target.count == 0)
+					{
+						targetList.Remove(target);
+					}
+					break; // 일치하는 hex는 유일하다고 가정할 경우
+				}
+			}
 			return;
 		}
-		
+
 		var targetType = targetData.TargetObjectType;
-	
+
 		if (targetType == TargetObjectType.Block)
 		{
 			var target_Block_Data = (Target_Block_Data)targetData;
-			
+
 			var blockObj = GetTarget(hex);
-			
+
 			// 이미 배치된 블록이 없는 위치인데 우클릭(-1) 했으면 아무것도 하지 않음
 			if (blockObj == null && value == -1) return;
-			
+
 			// 블록이 없다면 새 블록 생성
 			if (blockObj == null && value == 1)
 			{
@@ -255,8 +273,8 @@ public class Board_Edit : ObjectSingleton<Board_Edit>
 			else
 			{
 				var block = blockObj.GetComponent<Block>();
-				block.BlockData.HP+= value;
-			
+				block.BlockData.HP += value;
+
 				if (blockObj.TryGetComponent<HpSpriteHandler>(out var hpSpriteHandler))
 				{
 					if (block.BlockData.HP > hpSpriteHandler.MaxHp)
@@ -265,9 +283,9 @@ public class Board_Edit : ObjectSingleton<Board_Edit>
 					}
 					hpSpriteHandler.Init(block.BlockData.HP);
 				}
-				
+
 				stageData.AddOrUpdateBlockToken(target_Block_Data, hex, block.BlockData.HP);
-				
+
 				// 블록 HP가 0 이하가 되면 제거
 				if (block.BlockData.HP <= 0)
 				{
@@ -278,38 +296,38 @@ public class Board_Edit : ObjectSingleton<Board_Edit>
 	}
 
 	public GameObject GetTarget(Hex hex) => targets[hex.y, hex.x];
-	
+
 	private void CreateTargetBlock(Target_Block_Data targetBlockData, Hex hex)
 	{
 		// 새 블록 생성
 		var blockObject = GameObject.Instantiate(targetBlockData.Prefab, blockHolder, true);
 		blockObject.transform.localPosition = IndexToLocalPos(hex.x, hex.y);
-        
+
 		var block = blockObject.GetComponent<Block>();
 
 		// BlockData 복제 로직(Reflection 또는 직접 복사 가능)
 		// 일단 새 ScriptableObject 생성 후 HP 초기화
 		var newBlockData = ScriptableObject.CreateInstance<BlockData>();
-		
+
 		var blockData = targetBlockData.BlockData;
-		
+
 		// Reflection을 사용해 필드 값 복사
 		Util.CopyFields(blockData, newBlockData);
-		
+
 		newBlockData.HP = 1;
 
 		block.SetData(newBlockData);
 		targets[hex.y, hex.x] = blockObject;
-		
+
 		if (blockObject.TryGetComponent<HpSpriteHandler>(out var hpSpriteHandler))
 		{
 			hpSpriteHandler.Init(block.BlockData.HP);
 		}
-		
+
 		// StageData에 기록 (타겟 토큰 리스트 업데이트 포함)
 		stageData.AddOrUpdateBlockToken(targetBlockData, hex, newBlockData.HP);
 	}
-	
+
 	private void RemoveTargetBlock(Hex hex)
 	{
 		var blockObj = targets[hex.y, hex.x];
@@ -322,8 +340,8 @@ public class Board_Edit : ObjectSingleton<Board_Edit>
 	}
 
     #endregion
-	
-	
+
+
 	public void SetBlock((ColorLayer color, BlockData data) blockData, Hex hex)
 	{
 		GameObject blockObject = null;
@@ -332,6 +350,8 @@ public class Board_Edit : ObjectSingleton<Board_Edit>
 		if (blockData.data is null)
 		{
 			Object.DestroyImmediate(blocks[hex.y, hex.x]?.gameObject);
+			stageData.sBlockColorTokens.RemoveAll(x => x.hex.Equals(hex));
+
 			blocks[hex.y, hex.x] = null;
 		}
 		else
@@ -351,7 +371,7 @@ public class Board_Edit : ObjectSingleton<Board_Edit>
 			if (blockType is not SpecialBlockType.None and not SpecialBlockType.Super)
 			{
 				block.SetColor(blockData.color);
-				
+
 				var existingBlock = stageData.sBlockColorTokens.FirstOrDefault(b => b.hex == hex);
 				if (existingBlock != null)
 				{
@@ -367,7 +387,7 @@ public class Board_Edit : ObjectSingleton<Board_Edit>
 					});
 				}
 			}
-		
+
 			blocks[hex.y, hex.x] = block;
 		}
 	}
@@ -395,10 +415,10 @@ public class Board_Edit : ObjectSingleton<Board_Edit>
 
 		if (cellData.cellType is not CellType.Basic)
 			SetBlock((ColorLayer.None, null), hex);
-		
+
 		if (cellData.cellType is CellType.None)
 			cells[hex.y, hex.x].gameObject.SetActive(false);
-		
+
 		if (cellData.cellType is CellType.Basic)
 			cells[hex.y, hex.x].gameObject.SetActive(true);
 	}

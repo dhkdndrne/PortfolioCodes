@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class SpecialBlockBehaviour : MonoBehaviour, ISpecialBlockBehaviour
 {
@@ -11,11 +12,20 @@ public class SpecialBlockBehaviour : MonoBehaviour, ISpecialBlockBehaviour
 
 	public void Execute(Hex hex,SpecialBlockType blockType, HashSet<Block> withinRangeList)
 	{
+		var board = GameManager.Instance.Board;
+		if (Stage.Instance.isClear)
+		{
+			foreach (var b in board.GetBlockEnumerable())
+				withinRangeList.Add(b);
+			return;
+		}
+		
+		if (PopBlockDataManager.Instance.SwapSet.Count == 0) return;
+		
 		Block targetBlock = PopBlockDataManager.Instance.SwapSet.First();
 		if (targetBlock == null) return;
-
-		var board = GameManager.Instance.Board;
-		withinRangeList.Add(PopBlockDataManager.Instance.PopSet.First());
+		
+		withinRangeList.Add(PopBlockDataManager.Instance.PopSet?.First());
 		
 		foreach (var b in board.GetBlockEnumerable())
 		{
@@ -28,13 +38,15 @@ public class SpecialBlockBehaviour : MonoBehaviour, ISpecialBlockBehaviour
 
 	public async UniTask Anim(Block block)
 	{
-		var board = GameManager.Instance.Board;
+		if (Stage.Instance.isClear)
+			return;
 		
+		var board = GameManager.Instance.Board;
 		foreach (var b in hashSet)
 		{
 			var cell = board.GetCell(b.Hex);
 			cell.Shadow.SetActive(false);
-			await UniTask.Delay(TimeSpan.FromSeconds(0.1f));
+			await UniTask.Delay(TimeSpan.FromSeconds(0.05f));
 		}
 	}
 }

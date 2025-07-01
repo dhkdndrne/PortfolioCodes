@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "ColorSo List", fileName = "ColorSO List")]
+[CreateAssetMenu(menuName = "SO/ColorSo List", fileName = "ColorSO List")]
 public class ColorDataList : ScriptableObject
 {
 	[SerializeField] private List<ColorData> colorList = new List<ColorData>();

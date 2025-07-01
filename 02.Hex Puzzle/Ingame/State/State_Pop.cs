@@ -13,13 +13,10 @@ public class State_Pop : State
 {
 	[SerializeField] private float mergeMoveSpeed;
 
-	private HashSet<Block> hpSet = new();
+	private HashSet<Block> hpSet = new();          // hp감소할 블록 리스트
 	private HashSet<Block> frameVisitSet = new();  //방문 체크한 블록 리스트
 	private HashSet<Block> popSet = new();         // 터지는 블록 리스트
 	private HashSet<Block> usedSBlockList = new(); // 사용한 아이템 리스트
-
-	private Dictionary<Block, int> hpDic = new(); // hp 감소 시킬 블록 dictionary
-
 
 	private List<UniTask> blockMergeMoveTasks = new(); // 특수블록생성 위한 블록 움직임 task
 	private List<UniTask> taskList = new();            // 여러개의 task를  처리하기위한 리스트
@@ -78,15 +75,14 @@ public class State_Pop : State
 			if (Stage.Instance.MoveCnt.Value > 0)
 			{
 				GameManager.Instance.Board.CheckCanMatch();
-				
+
 				ChangeState<State_Input>();
 			}
 			else
 				ChangeState<State_GameOver>();
-			
+
 		}
 	}
-
 	private async UniTask<bool> PopAllBlock()
 	{
 		var popBlockDataManager = PopBlockDataManager.Instance;
@@ -98,66 +94,72 @@ public class State_Pop : State
 		HashSet<Block> withinRangeList = new();
 
 		var board = GameManager.Instance.Board;
-		
+
 		bool isShadowActived = false;
 
+		//특수블록 합성 or special 블록
 		if (popBlockDataManager.SpecialBlocks.Count > 0)
 		{
 			board.SetCellShadow(true);
 			isShadowActived = true;
-		}
-		
-		foreach (var sBlock in popBlockDataManager.SpecialBlocks)
-		{
-			//범위 체크
-			sBlock.behaviour.Execute(sBlock.hex, sBlock.blockType, withinRangeList);
-
-			//특수블록 애니메이션 실행
-			await sBlock.behaviour.Anim(board.GetBlock(sBlock.hex));
-			withinRangeList.AddRange(popBlockDataManager.PopSet);
-
-			foreach (var b in withinRangeList)
+			
+			foreach (var sBlock in popBlockDataManager.SpecialBlocks)
 			{
-				if (hpDic.ContainsKey(b))
+				//범위 체크
+				sBlock.behaviour.Execute(sBlock.hex, sBlock.blockType, withinRangeList);
+
+				if (Stage.Instance.isClear)
 				{
-					hpDic[b]--;
+					taskList.Add(sBlock.behaviour.Anim(board.GetBlock(sBlock.hex)));
 				}
-				else hpDic.Add(b, -1);
+				else
+				{
+					//특수블록 애니메이션 실행
+					await sBlock.behaviour.Anim(board.GetBlock(sBlock.hex));
+				}
+
+				withinRangeList.AddRange(popBlockDataManager.PopSet);
+
+				foreach (var b in withinRangeList)
+					hpSet.Add(b);
+
+				withinRangeList.Clear();
 			}
-
-			withinRangeList.Clear();
+			await UniTask.WhenAll(taskList);
+			popBlockDataManager.SpecialBlocks.Clear();
+			taskList.Clear();
 		}
-		popBlockDataManager.SpecialBlocks.Clear();
+		else
+		{
+			CheckShape(swapSet, hpSet, itemList);
+			CheckShape(dropSet, hpSet, itemList);
 
-
-		CheckShape(swapSet, hpSet, itemList);
-		CheckShape(dropSet, hpSet, itemList);
-
-		swapSet.Clear();
-		dropSet.Clear();
+			swapSet.Clear();
+			dropSet.Clear();
+		}
 
 		CheckDuplicatedBlock(itemList, out var newItemList);
-		frameVisitSet.Clear();
-		withinRangeList.Clear();
 
 		bool isPoped = false;
 		bool isLoop = true;
-		
+
 		while (isLoop)
 		{
+			frameVisitSet.Clear();
 			taskList.Clear();
 			bool isItemLoop = true;
+
 			while (isItemLoop)
 			{
-				foreach (var v in hpDic)
+				foreach (var b in hpSet)
 				{
-					frameVisitSet.Add(v.Key);
+					if (b.HP - 1 <= 0)
+						popSet.Add(b);
 				}
 
-				DecreaseHp();
-				isPoped |= popSet.Count > 0;
-				hpDic.Clear();
+				hpSet.ExceptWith(popSet); // popset에 포함된 블록들 제거
 
+				bool check = false;
 				//터진 블록 중 특수 블록 있으면 동작
 				foreach (var block in popSet)
 				{
@@ -180,45 +182,40 @@ public class State_Pop : State
 						if (b == block) continue;
 						if (b == null) continue;
 
-						if (hpDic.ContainsKey(b))
-						{
-							hpDic[b]--;
-						}
-						else hpDic.Add(b, -1);
+						if (frameVisitSet.Add(b))
+							hpSet.Add(b);
 					}
+					check = true;
+					withinRangeList.Clear();
 				}
 
-				isItemLoop = hpDic.Count > 0;
+				isPoped |= popSet.Count > 0;
+				isItemLoop = check;
 			}
-			
-			if (isShadowActived && hpSet.Count > 0)
-			{
-				HashSet<Block> blockSet = new HashSet<Block>();
-				blockSet.AddRange(hpSet);
-				taskList.Add(board.ShowTargetHighlightAll(blockSet));
-			}
-			
+
+			CheckAffectedBlock();
+
+			if (isShadowActived && popSet.Count > 0)
+				taskList.Add(board.ShowTargetHighlightAll(popSet));
+
 			await UniTask.WhenAll(taskList);
 			board.SetCellShadow(false);
-
 			await CreateItemMove(newItemList);
+			await PlayBlockPopSequence();
 
-			PopBlock();
-			await StartBlockPopAnimation();
-			isLoop = hpDic.Count > 0;
+			isLoop = hpSet.Count > 0;
 			popSet.Clear();
+			hpSet.Clear();
 		}
 
 		foreach (var item in newItemList)
-		{
 			board.CreateNewItemBlock(item);
-		}
 		
 		popBlockDataManager.PopSet.Clear();
 		return isPoped;
 	}
 
-	private async UniTask StartBlockPopAnimation()
+	private async UniTask PlayBlockPopSequence()
 	{
 		taskList.Clear();
 		foreach (var block in popSet)
@@ -230,6 +227,11 @@ public class State_Pop : State
 			taskList.Add(fx.StartAnimation());
 		}
 
+		foreach (var block in hpSet)
+			block.SetHP(-1);
+
+		RemoveBlocks();
+
 		await UniTask.WhenAll(taskList);
 	}
 	private void CheckShape(HashSet<Block> list, HashSet<Block> hpSet, List<ReservedSBlockData> itemList)
@@ -239,42 +241,19 @@ public class State_Pop : State
 		{
 			ShapeCheckManager.Instance.CheckShapes(block, hpSet, itemList);
 		}
-
-		//블록들 hp감소 딕셔너리에 등록
-		foreach (var block in hpSet)
-		{
-			if (!hpDic.TryGetValue(block, out var val))
-			{
-				hpDic.Add(block, -1);
-			}
-			else val -= 1;
-		}
 	}
-	private void DecreaseHp()
+	private void CheckAffectedBlock()
 	{
-		foreach (var b in hpDic)
-		{
-			var block = b.Key;
-			block.SetHP(b.Value);
-			
-			if (block.HP <= 0)
-			{
-				popSet.Add(block);
-			}
-			
-			if (block.TryGetComponent<HpSpriteHandler>(out var hpSpriteHandler))
-			{
-				hpSpriteHandler.ChangeSprite(block.HP);
-			}
-		}
-	}
-	private void PopBlock()
-	{
-		var stage = Stage.Instance;
 		var board = GameManager.Instance.Board;
+		HashSet<Block> additionalPopBlocks = new();
+		Queue<Block> popBlockQueue = new();
+
 		foreach (var block in popSet)
+			popBlockQueue.Enqueue(block);
+
+		while (popBlockQueue.Count > 0)
 		{
-			//주변타일 영향 주는지
+			var block = popBlockQueue.Dequeue();
 			if (block.BlockData.CanAffectOther)
 			{
 				for (int i = 0; i < (int)HexWay.Length; i++)
@@ -290,16 +269,30 @@ public class State_Pop : State
 
 					if (frameVisitSet.Add(nb))
 					{
-						if (hpDic.ContainsKey(nb))
-							hpDic[nb]--;
+						if (nb.HP - 1 <= 0)
+						{
+							popBlockQueue.Enqueue(nb);
+							additionalPopBlocks.Add(nb);
+						}
 						else
-							hpDic.Add(nb, -1);
+						{
+							hpSet.Add(nb);
+						}
 					}
 				}
 			}
+		}
+		popSet.AddRange(additionalPopBlocks);
+	}
 
-			//블록 위 셀에 영향 주는지
-			//var cell = board.GetCell(block.Hex);
+	private void RemoveBlocks()
+	{
+		var stage = Stage.Instance;
+		var board = GameManager.Instance.Board;
+
+		foreach (var block in popSet)
+		{
+			block.SetHP(-1);
 
 			//점수 추가
 			stage.Score.Value += 10;
@@ -325,7 +318,7 @@ public class State_Pop : State
 	{
 		var board = GameManager.Instance.Board;
 		blockMergeMoveTasks.Clear();
-		
+
 		foreach (var data in list)
 		{
 			if (data.BlockList == null) continue;
@@ -338,7 +331,7 @@ public class State_Pop : State
 				blockMergeMoveTasks.Add(task);
 			}
 		}
-	
+
 		await UniTask.WhenAll(blockMergeMoveTasks);
 	}
 

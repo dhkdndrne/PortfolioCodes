@@ -70,11 +70,11 @@ public class State_Clear : State
 
 			PopBlockDataManager.Instance.SpecialBlocks.Add((newBlock.Hex,((SpecialBlockData)newBlock.BlockData).SBlockType,newBlock.GetComponent<ISpecialBlockBehaviour>()));
 			cnt--;
-			await UniTask.Delay(TimeSpan.FromSeconds(0.1f));
+			Stage.Instance.MoveCnt.Value--;
+			await UniTask.Delay(TimeSpan.FromSeconds(0.05f));
 		}
 
 		Stage.Instance.isClear = true;
-		
 		ChangeState<State_Pop>();
 	}
 }

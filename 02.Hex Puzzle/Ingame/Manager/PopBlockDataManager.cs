@@ -8,5 +8,5 @@ public class PopBlockDataManager : ObjectSingleton<PopBlockDataManager>
 	public HashSet<Block> SwapSet { get; private set; } = new HashSet<Block>();
 	public HashSet<Block> PopSet {get;private set;}= new HashSet<Block>();
 
-	public List<(Hex hex, SpecialBlockType blockType, ISpecialBlockBehaviour behaviour)> SpecialBlocks { get; private set; } = new();
+	public List<(Hex hex, SpecialBlockType blockType, ISpecialBlockBehaviour behaviour)> SpecialBlocks { get; private set; } = new(); // 특수블록 합성 or special블록
 }

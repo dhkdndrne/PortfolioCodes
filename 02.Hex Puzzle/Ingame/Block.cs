@@ -44,4 +44,12 @@ public class Block : GridObject
 		return
 			BlockData.CanMatch && other.BlockData.CanMatch && ColorLayer == other.ColorLayer;
 	}
+
+	private void OnDisable()
+	{
+		if (HP <= 0 && TryGetComponent(out HpSpriteHandler hpSpriteHandler))
+		{
+			OnHpChanged -= hpSpriteHandler.ChangeSprite;
+		}
+	}
 }

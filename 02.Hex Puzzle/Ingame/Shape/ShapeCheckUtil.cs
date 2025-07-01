@@ -49,7 +49,7 @@ public static class ShapeCheckUtil
 			nHex = Hex.GetHexByWay(nHex, way);
 
 			if (board.IsIndexOutOfRange(nHex)) break;
-			if (!board.IsValidIndex(nHex)) break;
+			if (!board.IsValidIndex(nHex)) continue;
 
 			var nb = board.GetBlock(nHex);
 			if (nb == null) continue;

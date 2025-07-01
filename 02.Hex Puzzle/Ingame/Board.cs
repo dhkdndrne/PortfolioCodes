@@ -18,6 +18,7 @@ public class Board : MonoBehaviour
 	private StageData stageData;
 	private BoardShuffleSystem shuffleSystem;
 
+	[SerializeField] private bool showCellIndex;
 	[field: SerializeField] public List<Cell> SpawnCellList { get; private set; } = new();
 
 	public int Col => stageData.Col;
@@ -38,9 +39,9 @@ public class Board : MonoBehaviour
 
 		(shuffleSystem ??= new BoardShuffleSystem(this)).ValidateStageShuffle();
 	}
-	
-	public void CheckCanMatch( )=> shuffleSystem.CheckMatchingBlocks();
-	
+
+	public void CheckCanMatch() => shuffleSystem.CheckMatchingBlocks();
+
 	private void CreateHolder()
 	{
 		if (cellHolder != null)
@@ -62,14 +63,13 @@ public class Board : MonoBehaviour
 		blocks = new Block[Row, Col];
 
 		InitTargets();
-		
+
 		for (int y = 0; y < Row; y++)
 		{
 			for (int x = 0; x < Col; x++)
 			{
 				InitCell(x, y);
 				InitBlock(x, y);
-				
 			}
 		}
 
@@ -78,7 +78,7 @@ public class Board : MonoBehaviour
 
 		cellHolder.position = new Vector3(-xCenter, -yCenter, cellHolder.position.z);
 		blockHolder.position = new Vector3(-xCenter, -yCenter, blockHolder.position.z);
-		
+
 		blockHolder.gameObject.SetActive(false);
 		cellHolder.gameObject.SetActive(false);
 	}
@@ -89,35 +89,35 @@ public class Board : MonoBehaviour
 
 		foreach (var targetToken in targetList)
 		{
-			if(targetToken.tokenList.Count == 0) continue;
-			
+			if (targetToken.tokenList.Count == 0) continue;
+
 			var targetType = targetToken.targetData.TargetObjectType;
-			int count = targetToken.count;	// 타겟의 개수
+			int count = targetToken.count; // 타겟의 개수
 			Transform parent = targetType is TargetObjectType.Block ? blockHolder : cellHolder;
-			
+
 			for (int i = 0; i < count; i++)
 			{
 				Hex hex = targetToken.tokenList[i].hex;
-	
+
 				var targetData = (Target_Block_Data)targetToken.targetData;
-				var obj = Instantiate(((Target_Block_Data)targetToken.targetData).Prefab,parent);
+				var obj = Instantiate(((Target_Block_Data)targetToken.targetData).Prefab, parent);
 				var block = obj.GetComponent<Block>();
-				
+
 				var newBlockData = ScriptableObject.CreateInstance<BlockData>();
 				var blockData = targetData.BlockData;
-		
+
 				// Reflection을 사용해 필드 값 복사
 				Util.CopyFields(blockData, newBlockData);
-				
+
 				//체력 재설정
 				blockData.HP = targetToken.tokenList[i].hp;
-				
+
 				block.SetData(targetData.BlockData);
 				SetBlockTransform(block, hex.x, hex.y);
 			}
 		}
 	}
-	
+
 	private void InitCell(int x, int y)
 	{
 		var cellObject = ObjectPoolManager.Instance.Spawn("Cell");
@@ -133,7 +133,9 @@ public class Board : MonoBehaviour
 
 		cell.Shadow.SetActive(false);
 		cell.tmp.enabled = true;
-		cell.tmp.text = $"[{y},{x}]";
+
+		if (showCellIndex)
+			cell.tmp.text = $"[{y},{x}]";
 
 		var cellData = stageData.GetCellData(x, y);
 
@@ -154,7 +156,7 @@ public class Board : MonoBehaviour
 			return;
 
 		if (GetBlock(x, y) != null) return;
-		
+
 		CreateNewBlock(x, y);
 	}
 
@@ -167,7 +169,7 @@ public class Board : MonoBehaviour
 			not null => BlockSpawner.Instance.SpawnBlock(blockData, new Hex(x, y)),
 			null => BlockSpawner.Instance.SpawnRandomBlock()
 		};
-		
+
 		SetBlockTransform(block, x, y);
 	}
 
@@ -277,7 +279,7 @@ public class Board : MonoBehaviour
 	{
 		return GetBlockEnumerable().Any(block => block.BlockData as SpecialBlockData != null);
 	}
-	
+
 	public void ExchangeBlockInfo(Block b1, Block b2)
 	{
 		var temp = b1;
@@ -304,7 +306,7 @@ public class Board : MonoBehaviour
 
 		blocks[blockHex.y, blockHex.x] = null;
 	}
-	
+
 	/// <summary>
 	/// 한번에 보여줌
 	/// </summary>
@@ -316,8 +318,7 @@ public class Board : MonoBehaviour
 			var cell = GetCell(b.Hex);
 			cell.Shadow.SetActive(false);
 		}
-
-		await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
+		await UniTask.Delay(TimeSpan.FromSeconds(0.35f));
 	}
 	public void SetCellShadow(bool active)
 	{
@@ -330,9 +331,9 @@ public class Board : MonoBehaviour
 
 	public async UniTask PlayBoardAnim()
 	{
-		blockHolder.gameObject.SetActive(true);	
-		cellHolder.gameObject.SetActive(true);	
-		
+		blockHolder.gameObject.SetActive(true);
+		cellHolder.gameObject.SetActive(true);
+
 		List<UniTask> tasks = new List<UniTask>();
 		foreach (var block in GetBlockEnumerable())
 		{

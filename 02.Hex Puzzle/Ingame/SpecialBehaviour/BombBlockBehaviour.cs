@@ -13,7 +13,8 @@ public class BombBlockBehaviour : MonoBehaviour, ISpecialBlockBehaviour
 		var board = GameManager.Instance.Board;
 		q.Clear();
 		q.Enqueue(board.GetBlock(hex));
-
+		withinRangeList.Add(board.GetBlock(hex));
+		
 		int cnt = 1;
 		int cycle = range;
 

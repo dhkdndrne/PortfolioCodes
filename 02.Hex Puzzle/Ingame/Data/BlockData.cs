@@ -10,7 +10,6 @@ public class BlockData : ScriptableObject
 	[field: SerializeField] public bool CanSwap { get; private set; }
 	[field: SerializeField] public bool CanAffectOther { get; private set; }
 	[field: SerializeField] public bool CanAffected { get; private set; }
-	[field: SerializeField] public bool CanClick { get; private set; }
 	[field: SerializeField] public bool CanMerge { get; private set; }
 	[field:SerializeField] public int HP { get; set; }
 	

@@ -27,7 +27,7 @@ public class StageData : ScriptableObject
 	[SerializeField] private List<BlockData> blocks = new List<BlockData>();
 	
 	public List<EditorSBlockColorToken> sBlockColorTokens = new List<EditorSBlockColorToken>();
-	[field: SerializeField] private List<TargetToken> targetList;
+	[field: SerializeField] private List<TargetToken> targetList = new();
 	
 	
 	/// <summary>

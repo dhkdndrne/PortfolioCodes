@@ -36,9 +36,7 @@ public class VerticalBlockBehaviour : MonoBehaviour, ISpecialBlockBehaviour
 		var end0 = obj0.transform.position + (dir1 * 10);
 		var end1 = obj1.transform.position + (dir2 * 10);
 		
-		var task1 = obj0.transform.DOMove(end0, 20).SetEase(Ease.Linear).SetSpeedBased(true).OnComplete(() => Destroy(obj0)).ToUniTask();
-		var task2 = obj1.transform.DOMove(end1, 20).SetEase(Ease.Linear).SetSpeedBased(true).OnComplete(() => Destroy(obj1)).ToUniTask();
-		
-		//await UniTask.WhenAll(task1,task2);
+		obj0.transform.DOMove(end0, 20).SetEase(Ease.Linear).SetSpeedBased(true).OnComplete(() => Destroy(obj0));
+		obj1.transform.DOMove(end1, 20).SetEase(Ease.Linear).SetSpeedBased(true).OnComplete(() => Destroy(obj1));
 	}
 }
