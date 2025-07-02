@@ -41,8 +41,8 @@ public class Target_PopUp : PopUP
 		for (int i = 0; i < targets.Count; i++)
 		{
 			targetObjects[i].SetActive(true);
-			
-			targetTokens[i].image.sprite = targets[i].targetData.Sprites[0];
+
+			targetTokens[i].image.sprite = targets[i].targetData.GetSprite();
 
 			if (targets[i].targetData.TargetObjectType is TargetObjectType.Block)
 			{

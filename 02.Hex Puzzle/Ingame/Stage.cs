@@ -42,7 +42,7 @@ public class Stage : ObjectSingleton<Stage>
 			if(t.targetData.TargetObjectType != TargetObjectType.Block)
 				continue;
 			
-			if (((Target_Block_Data)t.targetData).ColorLayer == block.ColorLayer && t.targetData.Sprites.Contains(block.BlockData.Sprite))
+			if (((Target_Block_Data)t.targetData).ColorLayer == block.ColorLayer)
 			{
 				targetDic[t] += newCount;
 				OnTargetUpdated?.Invoke(block.BlockData.Sprite,targetDic[t]);

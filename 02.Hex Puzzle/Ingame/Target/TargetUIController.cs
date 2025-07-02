@@ -40,7 +40,7 @@ public class TargetUIController : MonoBehaviour
 			targets[i].SetUI(targetData, targetList[i].count);
 
 			// Dictionary에 매핑
-			targetDictionary[targetData.Sprites[0]] = targets[i];
+			targetDictionary[targetData.GetSprite()] = targets[i];
 		}
 	}
 

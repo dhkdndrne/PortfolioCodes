@@ -4,9 +4,10 @@ using UnityEngine;
 public class TargetData : ScriptableObject
 {
 	[SerializeField] private TargetObjectType targetObjectType;
-	[SerializeField] private List<Sprite> sprites;
-	
-	public List<Sprite> Sprites => sprites;
 	public TargetObjectType TargetObjectType => targetObjectType;
+	public virtual Sprite GetSprite()
+	{
+		return null;
+	}
 }
 

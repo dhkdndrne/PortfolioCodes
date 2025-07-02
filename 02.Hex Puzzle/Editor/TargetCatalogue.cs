@@ -69,7 +69,7 @@ public class TargetCatalogue : CatalogueItem
 
 			foreach (var targetData in list.Value)
 			{
-				var buttonContent = new GUIContent { image = targetData.Sprites[0].texture };
+				var buttonContent = new GUIContent { image = targetData.GetSprite().texture };
 
 				SetButtonBackgroundColor(targetData);
 				if (GUILayout.Button(buttonContent, CreateButtonStyle(buttonDimensions.width, buttonDimensions.height)))

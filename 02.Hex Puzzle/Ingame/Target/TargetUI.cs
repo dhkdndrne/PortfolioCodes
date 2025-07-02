@@ -12,7 +12,7 @@ public class TargetUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI countText;
     public void SetUI(TargetData targetData ,int count)
     {
-        image.sprite = targetData.Sprites[0];
+        image.sprite = targetData.GetSprite();
 
         if (targetData.TargetObjectType is TargetObjectType.Block)
         {

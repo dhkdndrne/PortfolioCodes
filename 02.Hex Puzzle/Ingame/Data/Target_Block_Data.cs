@@ -11,4 +11,6 @@ public class Target_Block_Data : TargetData
 	public ColorLayer ColorLayer => blockData.ColorLayer;
 	public BlockData BlockData => blockData;
 	public GameObject Prefab => prefab;
+	public override Sprite GetSprite() => blockData.Sprite;
+
 }
